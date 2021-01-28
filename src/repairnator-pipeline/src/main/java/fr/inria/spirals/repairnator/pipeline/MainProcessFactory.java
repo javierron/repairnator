@@ -104,6 +104,7 @@ public class MainProcessFactory {
 		} catch (JSAPException e) {
 			throw new RuntimeException("Failed to parse JSAP");
 		}
+
 		githubInitConfig.initConfigWithJSAP(jsap,inputArgs);
 		githubInitSerializerEngines.initSerializerEngines();
 		githubInitNotifiers.initNotifiers();
@@ -115,11 +116,56 @@ public class MainProcessFactory {
 
 		serializeHardwareInfoSerializer(githubInitSerializerEngines.getEngines());
 
-		ProjectInspector inspector =  constructInspector4Github(githubInitSerializerEngines.getEngines(),githubInitNotifiers.getNotifiers());
+		ProjectInspector inspector;
+
+		switch (getConfig().getLauncherMode()){
+			case SEQUENCER_REPAIR:
+				inspector = constructInspector4SequencerRepair(githubInitSerializerEngines.getEngines(),githubInitNotifiers.getNotifiers());
+				break;
+			case SORALD:
+				inspector = constructInspector4Sorald(githubInitSerializerEngines.getEngines(),githubInitNotifiers.getNotifiers());
+				break;
+			default:
+				inspector = constructInspector4Github(githubInitSerializerEngines.getEngines(),githubInitNotifiers.getNotifiers());
+				break;
+		}
 
 		githubMainProcess = githubMainProcess.setInspector(inspector)
 												.setNotifiers(githubInitNotifiers.getNotifiers())
 												.setEngines(githubInitSerializerEngines.getEngines());
+
+		return githubMainProcess;
+	}
+
+	public static MainProcess getSoraldMainProcess(String[] inputArgs) {
+
+		GithubDefineJSAPArgs githubDefineJSAPArgs = new GithubDefineJSAPArgs();
+		GithubInitConfig githubInitConfig = new GithubInitConfig();
+		GithubInitNotifiers githubInitNotifiers = new GithubInitNotifiers();
+		GithubInitSerializerEngines githubInitSerializerEngines = new GithubInitSerializerEngines();
+
+		JSAP jsap;
+		try {
+			jsap = githubDefineJSAPArgs.defineArgs();
+		} catch (JSAPException e) {
+			throw new RuntimeException("Failed to parse JSAP");
+		}
+		githubInitConfig.initConfigWithJSAP(jsap,inputArgs);
+		githubInitSerializerEngines.initSerializerEngines();
+		githubInitNotifiers.initNotifiers();
+
+		GithubMainProcess githubMainProcess = new GithubMainProcess(githubDefineJSAPArgs,
+				githubInitConfig,
+				githubInitSerializerEngines,
+				githubInitNotifiers);
+
+		serializeHardwareInfoSerializer(githubInitSerializerEngines.getEngines());
+
+		ProjectInspector inspector =  constructInspector4Github(githubInitSerializerEngines.getEngines(),githubInitNotifiers.getNotifiers());
+
+		githubMainProcess = githubMainProcess.setInspector(inspector)
+				.setNotifiers(githubInitNotifiers.getNotifiers())
+				.setEngines(githubInitSerializerEngines.getEngines());
 
 		return githubMainProcess;
 	}
@@ -159,6 +205,53 @@ public class MainProcessFactory {
         inspector.getSerializers().add(new PullRequestSerializer4GitRepository(engines, inspector));
 
         return inspector;
+	}
+	private static GitRepositoryProjectInspector constructInspector4SequencerRepair(List<SerializerEngine> engines,List<AbstractNotifier> notifiers) {
+
+		System.out.println("Gitbranch " + getConfig().getGitRepositoryBranch());
+		GitRepositoryProjectInspector inspector = (GitRepositoryProjectInspector) InspectorFactory.getGitSequencerRepairInspector(
+				getConfig().getGitRepositoryUrl(),
+				getConfig().getGitRepositoryBranch(),
+				getConfig().getGitRepositoryIdCommit(),
+				getConfig().isGitRepositoryFirstCommit(),
+				getConfig().getWorkspacePath(),
+				notifiers
+		);
+
+		inspector.getSerializers().add(new InspectorSerializer4GitRepository(engines, inspector));
+		inspector.getSerializers().add(new PropertiesSerializer4GitRepository(engines, inspector));
+		inspector.getSerializers().add(new InspectorTimeSerializer4GitRepository(engines, inspector));
+		inspector.getSerializers().add(new PipelineErrorSerializer4GitRepository(engines, inspector));
+		inspector.getSerializers().add(new PatchesSerializer4GitRepository(engines, inspector));
+		inspector.getSerializers().add(new ToolDiagnosticSerializer4GitRepository(engines, inspector));
+		inspector.getSerializers().add(new PullRequestSerializer4GitRepository(engines, inspector));
+
+		return inspector;
+	}
+
+	private static GitRepositoryProjectInspector constructInspector4Sorald(List<SerializerEngine> engines,List<AbstractNotifier> notifiers) {
+		boolean shouldStaticAnalysis = getConfig().getRepairTools().contains(Sorald.TOOL_NAME) && getConfig().getRepairTools().size() == 1;
+
+		System.out.println("Gitbranch " + getConfig().getGitRepositoryBranch());
+		GitRepositoryProjectInspector inspector = (GitRepositoryProjectInspector) InspectorFactory.getGithubInspector(
+				getConfig().getGitRepositoryUrl(),
+				getConfig().getGitRepositoryBranch(),
+				getConfig().getGitRepositoryIdCommit(),
+				getConfig().isGitRepositoryFirstCommit(),
+				getConfig().getWorkspacePath(),
+				notifiers
+		);
+
+		inspector.setSkipPreSteps(shouldStaticAnalysis);
+		inspector.getSerializers().add(new InspectorSerializer4GitRepository(engines, inspector));
+		inspector.getSerializers().add(new PropertiesSerializer4GitRepository(engines, inspector));
+		inspector.getSerializers().add(new InspectorTimeSerializer4GitRepository(engines, inspector));
+		inspector.getSerializers().add(new PipelineErrorSerializer4GitRepository(engines, inspector));
+		inspector.getSerializers().add(new PatchesSerializer4GitRepository(engines, inspector));
+		inspector.getSerializers().add(new ToolDiagnosticSerializer4GitRepository(engines, inspector));
+		inspector.getSerializers().add(new PullRequestSerializer4GitRepository(engines, inspector));
+
+		return inspector;
 	}
 
 	private static ProjectInspector constructInspector4Default(BuildToBeInspected buildToBeInspected, List<SerializerEngine> engines, List<AbstractNotifier> notifiers) {

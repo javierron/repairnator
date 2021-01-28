@@ -2,26 +2,18 @@ package fr.inria.spirals.repairnator.process.step.repair;
 
 import fr.inria.spirals.repairnator.process.inspectors.RepairPatch;
 import fr.inria.spirals.repairnator.process.step.StepStatus;
-import fr.inria.spirals.repairnator.process.maven.MavenHelper;
-import fr.inria.spirals.repairnator.process.testinformation.FailureLocation;
-import fr.inria.spirals.repairnator.process.testinformation.FailureType;
 import fr.inria.spirals.repairnator.process.git.GitHelper;
 
-import org.apache.commons.io.FileUtils;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.Git;
 
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.lang.StringBuilder;
-import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.HashMap;
 import java.net.URISyntaxException;
@@ -32,7 +24,7 @@ import fr.inria.spirals.repairnator.config.RepairnatorConfig;
 
 import org.apache.commons.lang3.text.StrSubstitutor;
 
-import sorald.Main;
+//import sorald.Main;
 
 public class Sorald extends AbstractRepairStep {
     public static final String TOOL_NAME = "Sorald";
@@ -40,6 +32,11 @@ public class Sorald extends AbstractRepairStep {
     private final List<RepairPatch> allPatches = new ArrayList<RepairPatch>();
     private Git forkedGit;
     private String forkedRepo;
+    boolean skipPR;
+
+    public Sorald(){
+        skipPR = getConfig().isSoraldSkipPR();
+    }
 
     @Override
     public String getRepairToolName() {
@@ -70,9 +67,9 @@ public class Sorald extends AbstractRepairStep {
                             "--prettyPrintingStrategy","SNIPER",
                             "--maxFixesPerRule","" + getConfig().getSoraldMaxFixesPerRule(),
                             "--repairStrategy",RepairnatorConfig.getInstance().getSoraldRepairMode().name(),
-                            "--maxFilesPerSegment","" + RepairnatorConfig.getInstance().getSegmentSize()};
+                            "--maxFilesPerSegment","" + RepairnatorConfig.getInstance().getSoraldSegmentSize()};
             try {
-                Main.main(args);
+               // Main.main(args);
             } catch(Exception e) {
                 return StepStatus.buildSkipped(this,"Error while repairing with Sorald");
             }
@@ -115,8 +112,10 @@ public class Sorald extends AbstractRepairStep {
             this.setPrText(prTextBuilder.toString());
             try {
                 this.pushPatches(this.forkedGit,this.forkedRepo,newBranchName);
-                this.setPRTitle("Fix Sorald violations");
-                this.createPullRequest(this.getInspector().getGitRepositoryBranch(),newBranchName);
+                if(!skipPR){
+                    this.setPRTitle("Fix Sorald violations");
+                    this.createPullRequest(this.getInspector().getGitRepositoryBranch(),newBranchName);
+                }
             } catch(IOException | GitAPIException | URISyntaxException e) {
                 e.printStackTrace();
                 return StepStatus.buildSkipped(this,"Error while creating pull request");

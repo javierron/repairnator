@@ -235,8 +235,9 @@ public class RepairPatch {
 			Files.write(Paths.get(patchedFile.getPath()), patchedLines);
 	
 			log.info("The patchPath file passed to ODS: "+patchPath);
-	
-			 label = new RepairnatorFeatures().getLabel(new File(patchPath));						
+
+			ComingProperties.setProperty("ODSmodel", "/root/ODSmodel.bin");
+			label = new RepairnatorFeatures().getLabel(new File(patchPath));
 
 		} catch (Exception e) {
 			log.error("Exception caused in the method of computeODSLabel: "+e);

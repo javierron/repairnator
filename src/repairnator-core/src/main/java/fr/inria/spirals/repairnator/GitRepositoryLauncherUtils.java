@@ -31,7 +31,7 @@ public class GitRepositoryLauncherUtils {
 
     public static void initGitConfig(RepairnatorConfig config, JSAPResult arguments, JSAP jsap) {
         if (GitRepositoryLauncherUtils.getArgGitRepositoryMode(arguments)) {
-            config.setLauncherMode(LauncherMode.GIT_REPOSITORY);
+         //   config.setLauncherMode(LauncherMode.GIT_REPOSITORY);
             if (GitRepositoryLauncherUtils.getArgGitRepositoryFirstCommit(arguments)) {
                 config.setGitRepositoryFirstCommit(true);
             }

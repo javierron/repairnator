@@ -4,13 +4,13 @@ package fr.inria.spirals.repairnator.pipeline;
 import ch.qos.logback.classic.Level;
 import com.martiansoftware.jsap.FlaggedOption;
 import com.martiansoftware.jsap.JSAPResult;
+import fr.inria.jtravis.entities.Branch;
 import fr.inria.spirals.repairnator.LauncherUtils;
 import fr.inria.spirals.repairnator.TravisInputBuild;
 import fr.inria.spirals.repairnator.TravisLauncherUtils;
 import fr.inria.spirals.repairnator.config.RepairnatorConfig;
 import fr.inria.spirals.repairnator.utils.Utils;
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
@@ -28,9 +28,13 @@ public class TestPipelineArgs {
 
     @Test
     public void testDefaultArgsLauncher() throws Exception {
-        Launcher launcher = new Launcher(new String[]{""});
+        String[] args = new String[]{""};
 
-        JSAPResult arguments = launcher.defineArgs().parse("");
+        Launcher launcher = new Launcher(args);
+
+        MainProcess p = BranchLauncher.getMainProcess(args);
+        JSAPResult arguments = p.getIDefineJSAPArgs().defineArgs().parse("");
+
         RepairnatorConfig config = RepairnatorConfig.getInstance();
 
         // help is disabled by default
@@ -159,8 +163,8 @@ public class TestPipelineArgs {
         assertEquals(defaultSoraldRepairMode.name(), LauncherUtils.getArgSoraldRepairMode(arguments));
         assertEquals(defaultSoraldRepairMode, config.getSoraldRepairMode());
         Integer defaultSegmentSize = 200;
-        assertEquals(defaultSegmentSize, LauncherUtils.getArgSegmentSize(arguments));
-        assertEquals((int) defaultSegmentSize, config.getSegmentSize());
+        assertEquals(defaultSegmentSize, LauncherUtils.getArgSoraldSegmentSize(arguments));
+        assertEquals((int) defaultSegmentSize, config.getSoraldSegmentSize());
         Integer defaultMaxFixesPerRule = 2000;
         assertEquals(defaultMaxFixesPerRule, LauncherUtils.getArgSoraldMaxFixesPerRule(arguments));
         assertEquals((int) defaultMaxFixesPerRule, config.getSoraldMaxFixesPerRule());

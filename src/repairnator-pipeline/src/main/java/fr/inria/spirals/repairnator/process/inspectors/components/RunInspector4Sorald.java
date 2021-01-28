@@ -19,16 +19,16 @@ import fr.inria.spirals.repairnator.process.step.repair.sequencer.detection.Asto
 import fr.inria.spirals.repairnator.process.step.repair.sequencer.detection.LogParserDetectionStrategy;
 import fr.inria.spirals.repairnator.serializer.AbstractDataSerializer;
 
-public class RunInspector4SequencerRepair extends IRunInspector{
+public class RunInspector4Sorald extends IRunInspector{
 
-    public RunInspector4SequencerRepair() {}
+    public RunInspector4Sorald() {}
 
 
-	@Override
-	public void run(ProjectInspector inspector) {
+    @Override
+    public void run(ProjectInspector inspector) {
 
         AbstractStep cloneRepo = new CloneCheckoutBranchRepository(inspector);
-//        cloneRepo.addNextStep(new CheckoutBuggyBuild(inspector, true));
+        cloneRepo.addNextStep(new CheckoutBuggyBuild(inspector, true));
         cloneRepo.addNextStep(new BuildProject(inspector, false));
 
         AbstractStep initRepoStep = new InitRepoToPush(inspector);

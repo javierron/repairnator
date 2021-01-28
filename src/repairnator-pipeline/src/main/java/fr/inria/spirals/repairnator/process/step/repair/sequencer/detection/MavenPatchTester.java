@@ -6,10 +6,8 @@ import fr.inria.spirals.repairnator.process.maven.MavenHelper;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.ResetCommand;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileWriter;
-import java.io.InputStream;
 import java.nio.file.Paths;
 import java.util.Properties;
 import java.util.UUID;
@@ -32,15 +30,12 @@ public class MavenPatchTester {
         //Create replica as git branch and apply patch
         logger.info("testing patch: " + patch.getFilePath());
         String patchName = Paths.get(patch.getFilePath()).getFileName().toString() + "-" + UUID.randomUUID();
-        boolean success = false;
         try {
             Git git = Git.open(new File(inspector.getRepoLocalPath()));
             String defaultBranch = git.getRepository().getBranch();
 
             git.branchCreate().setStartPoint(defaultBranch).setName(patchName).call();
             git.checkout().setName(patchName).call();
-
-            InputStream is = new ByteArrayInputStream(patch.getDiff().getBytes());
 
             FileWriter fw = new FileWriter(inspector.getRepoLocalPath() + "/diff");
             fw.write(patch.getDiff());
@@ -49,6 +44,7 @@ public class MavenPatchTester {
             ProcessBuilder processBuilder = new ProcessBuilder();
             processBuilder.directory(new File(inspector.getRepoLocalPath()));
             processBuilder.command("git", "apply", "--ignore-whitespace", "diff");
+
             Process applyProc = processBuilder.start();
 
             applyProc.waitFor();

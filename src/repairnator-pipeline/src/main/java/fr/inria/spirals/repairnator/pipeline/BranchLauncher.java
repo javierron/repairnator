@@ -5,11 +5,16 @@ import com.martiansoftware.jsap.JSAP;
 import com.martiansoftware.jsap.JSAPException;
 import com.martiansoftware.jsap.JSAPResult;
 
+import com.martiansoftware.jsap.stringparsers.EnumeratedStringParser;
+import fr.inria.spirals.repairnator.LauncherUtils;
+import fr.inria.spirals.repairnator.TravisLauncherUtils;
 import fr.inria.spirals.repairnator.config.RepairnatorConfig;
+import fr.inria.spirals.repairnator.process.step.repair.NPERepair;
 import fr.inria.spirals.repairnator.states.LauncherMode;
 import fr.inria.spirals.repairnator.process.inspectors.ProjectInspector;
 import fr.inria.spirals.repairnator.notifier.PatchNotifier;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +46,8 @@ public class BranchLauncher implements LauncherAPI{
         return jsap;
 	}
 
-	public static MainProcess getMainProcess(JSAP jsap,String[] args) throws JSAPException{
+	public static MainProcess getMainProcess(String[] args) throws JSAPException{
+		JSAP jsap = defineBasicArgs();
 		JSAPResult jsapResult = jsap.parse(args);
 
 		String launcherMode = jsapResult.getString("launcherMode");
@@ -70,21 +76,34 @@ public class BranchLauncher implements LauncherAPI{
 
 			return MainProcessFactory.getGithubMainProcess(args);
 
+		} else if (launcherMode.equals(LauncherMode.SEQUENCER_REPAIR.name())) {
+
+			RepairnatorConfig.getInstance().setLauncherMode(LauncherMode.SEQUENCER_REPAIR);
+
+			return MainProcessFactory.getGithubMainProcess(args);
+
+		}
+		else if (launcherMode.equals(LauncherMode.SORALD.name())) {
+
+			RepairnatorConfig.getInstance().setLauncherMode(LauncherMode.SORALD);
+
+			return MainProcessFactory.getGithubMainProcess(args);
+
 		} else if (launcherMode.equals(LauncherMode.KUBERNETES_LISTENER.name())) {
 			RepairnatorConfig.getInstance().setLauncherMode(LauncherMode.KUBERNETES_LISTENER);
 			return MainProcessFactory.getPipelineListenerMainProcess(args);
 		} else {
-			LOGGER.warn("Unknown launcher mode. Please choose the following: REPAIR, BEARS, CHECKSTYLE, GIT_REPOSITORY, KUBERNETES_LISTENER, JENKINS_PLUGIN");
+			LOGGER.warn("Unknown launcher mode: " + launcherMode + ". Please choose the following: REPAIR, BEARS, CHECKSTYLE, GIT_REPOSITORY, KUBERNETES_LISTENER, JENKINS_PLUGIN");
 			return null;
 		}
 	}
 
 
 	public static void main(String[] args) throws JSAPException {
-		JSAP jsap = defineBasicArgs();
-		JSAPResult jsapResult = jsap.parse(args);
+//		JSAP jsap = defineBasicArgs();
+//		JSAPResult jsapResult = jsap.parse(args);
 		
-		MainProcess mainProcess = getMainProcess(jsap,args);
+		MainProcess mainProcess = getMainProcess(args);
 		mainProcess.run();
 	}
 
@@ -109,7 +128,12 @@ public class BranchLauncher implements LauncherAPI{
 
     @Override
     public boolean mainProcess() {
-        return true;
+		try {
+			main(args);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+		return true;
     }
 
     @Override

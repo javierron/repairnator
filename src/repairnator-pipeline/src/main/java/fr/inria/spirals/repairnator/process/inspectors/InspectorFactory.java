@@ -19,7 +19,10 @@ public class InspectorFactory {
 
 	public static GitRepositoryProjectInspector getGitSequencerRepairInspector(String gitRepoUrl, String gitRepoBranch, String gitRepoIdCommit, boolean isGitRepositoryFirstCommit,
 															   String workspace, List<AbstractNotifier> notifiers){
-		return new GitRepositoryProjectInspector(gitRepoUrl,gitRepoBranch,gitRepoIdCommit,isGitRepositoryFirstCommit,workspace,notifiers);
+		GitRepositoryProjectInspector inspector = new GitRepositoryProjectInspector(gitRepoUrl,gitRepoBranch,gitRepoIdCommit,isGitRepositoryFirstCommit,workspace,notifiers);
+		inspector.setIRunInspector(new RunInspector4SequencerRepair());
+
+		return inspector;
 	}
 
 	public static GitRepositoryProjectInspector getGithubInspector(String gitRepoUrl, String gitRepoBranch, String gitRepoIdCommit, boolean isGitRepositoryFirstCommit,
@@ -29,6 +32,12 @@ public class InspectorFactory {
 		return inspector;
 	}
 
+	public static GitRepositoryProjectInspector getSoraldInspector(String gitRepoUrl, String gitRepoBranch, String gitRepoIdCommit, boolean isGitRepositoryFirstCommit,
+																   String workspace, List<AbstractNotifier> notifiers) {
+		GitRepositoryProjectInspector inspector = new GitRepositoryProjectInspector(gitRepoUrl,gitRepoBranch,gitRepoIdCommit,isGitRepositoryFirstCommit,workspace,notifiers);
+		inspector.setIRunInspector(new RunInspector4Sorald());
+		return inspector;
+	}
 
 	public static ProjectInspector4Bears getBearsInspector(BuildToBeInspected buildToBeInspected, String workspace, List<AbstractNotifier> notifiers) {
 		ProjectInspector4Bears inspector = new ProjectInspector4Bears(buildToBeInspected,workspace,notifiers);

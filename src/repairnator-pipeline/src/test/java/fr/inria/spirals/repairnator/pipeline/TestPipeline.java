@@ -37,14 +37,21 @@ public class TestPipeline {
         // eg export M2_HOME=/usr/share/maven
         // from surli/failingBuild
         Launcher l = new Launcher(new String[]{
-                "--build", "564711868",
-                "--repairTools", "NPEFix",
+                "--launcherChoice", "NEW",
+                "--launcherMode", "SEQUENCER_REPAIR",
+                "--gitrepo",
+                "--gitrepourl", "https://github.com/javierron/failingProject",
+                "--gitrepoidcommit","e182ccb9ef41b5adab602ed12bfc71b744ff0241",
+                "--repairTools", "SequencerRepair",
                 "--workspace", workspaceFolder.getRoot().getAbsolutePath(),
-                "--output", outputFolder.getRoot().getAbsolutePath()
+                "--output", outputFolder.getRoot().getAbsolutePath(),
+                "--createPR"
         });
+
         Patches patchNotifier = new Patches();
         l.setPatchNotifier(patchNotifier);
         l.mainProcess();
+
         assertEquals("PATCHED", l.getInspector().getFinding());
         assertEquals(10, patchNotifier.allpatches.size());
         assertTrue("patch is found", patchNotifier.allpatches.get(0).getDiff().contains("list == null"));

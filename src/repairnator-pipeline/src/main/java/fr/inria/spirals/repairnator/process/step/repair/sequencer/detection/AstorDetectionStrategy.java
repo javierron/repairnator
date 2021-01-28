@@ -44,7 +44,7 @@ public class AstorDetectionStrategy implements DetectionStrategy {
                 dependencies.add(url.getPath());
             }
         }
-//        cs.command.put("-loglevel", "DEBUG");
+       // cs.command.put("-loglevel", "DEBUG");
         cs.command.put("-mode", "custom");
         cs.command.put("-dependencies", StringUtils.join(dependencies,":"));
         cs.command.put("-location", jobStatus.getFailingModulePath());
@@ -52,6 +52,8 @@ public class AstorDetectionStrategy implements DetectionStrategy {
         cs.command.put("-maxgen", "0");
         cs.command.put("-javacompliancelevel", "8");
         cs.command.put("-customengine", ZmEngine.class.getCanonicalName());
+        //cs.command.put("-jvm4testexecution", "/usr/lib/jvm/java-11-openjdk-amd64/bin");
+
         cs.command.put("-parameters", "disablelog:false:logtestexecution:true:logfilepath:"
                 + inspector.getRepoLocalPath()
                 + "/repairnator." + "sequencerRepair" + ".log");

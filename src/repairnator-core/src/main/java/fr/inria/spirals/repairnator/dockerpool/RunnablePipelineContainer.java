@@ -79,7 +79,7 @@ public class RunnablePipelineContainer implements Runnable {
         this.envValues.add("LOG_FILENAME="+this.containerName);
         this.envValues.add("GITHUB_OAUTH="+RepairnatorConfig.getInstance().getGithubToken());
         this.envValues.add("RUN_ID="+this.repairnatorConfig.getRunId());
-        this.envValues.add("REPAIR_MODE="+this.repairnatorConfig.getLauncherMode().name().toLowerCase());
+        this.envValues.add("REPAIR_MODE="+this.repairnatorConfig.getLauncherMode().name());
         this.envValues.add("PUSH_URL="+this.repairnatorConfig.getPushRemoteRepo());
         this.envValues.add("MONGODB_HOST="+this.repairnatorConfig.getMongodbHost());
         this.envValues.add("MONGODB_NAME="+this.repairnatorConfig.getMongodbName());
@@ -93,6 +93,7 @@ public class RunnablePipelineContainer implements Runnable {
         this.envValues.add("OUTPUT="+output);
         this.envValues.add("TRAVIS_ENDPOINT="+this.repairnatorConfig.getJTravisEndpoint());
         this.envValues.add("TRAVIS_TOKEN="+this.repairnatorConfig.getTravisToken());
+
         if (this.repairnatorConfig.isCreatePR()) {
             this.envValues.add("CREATE_PR=1");
         }
@@ -102,7 +103,11 @@ public class RunnablePipelineContainer implements Runnable {
             this.envValues.add("SMTP_TLS=0");
         }
 
-        if (this.repairnatorConfig.getLauncherMode() == LauncherMode.REPAIR || this.repairnatorConfig.getLauncherMode() == LauncherMode.CHECKSTYLE) {
+        if (this.repairnatorConfig.getLauncherMode() == LauncherMode.REPAIR ||
+                this.repairnatorConfig.getLauncherMode() == LauncherMode.CHECKSTYLE ||
+                this.repairnatorConfig.getLauncherMode() == LauncherMode.GIT_REPOSITORY ||
+                this.repairnatorConfig.getLauncherMode() == LauncherMode.SEQUENCER_REPAIR
+        ) {
             this.envValues.add("REPAIR_TOOLS=" + StringUtils.join(this.repairnatorConfig.getRepairTools(), ","));
         }
 
@@ -113,6 +118,15 @@ public class RunnablePipelineContainer implements Runnable {
             this.envValues.add("SEQUENCER_BEAM_SIZE=" + sequencerConfig.beamSize);
             this.envValues.add("SEQUENCER_TIMEOUT=" + sequencerConfig.timeout);
             this.envValues.add("SEQUENCER_ODS_PATH=" + sequencerConfig.ODSPath);
+        }
+
+        if (this.repairnatorConfig.getRepairTools().contains("Sorald")){
+            this.envValues.add("SORALD_REPAIR_MODE=" + repairnatorConfig.getSoraldRepairMode());
+            this.envValues.add("SORALD_MAX_FIXES_PER_RULE=" + repairnatorConfig.getSoraldMaxFixesPerRule());
+            this.envValues.add("SORALD_SONAR_RULES=" + String.join(",", repairnatorConfig.getSonarRules()));
+            this.envValues.add("SORALD_SEGMENT_SIZE=" + repairnatorConfig.getSoraldSegmentSize());
+            this.envValues.add("SORALD_SKIP_PR=" + repairnatorConfig.isSoraldSkipPR());
+            this.envValues.add("SORALD_STATIC_ANALYSIS=" + repairnatorConfig.isStaticAnalysis());
         }
     }
 

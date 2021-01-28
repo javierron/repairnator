@@ -1,5 +1,6 @@
 package fr.inria.spirals.repairnator.process.inspectors.metrics4bears;
 
+import com.mongodb.util.JSON;
 import fr.inria.spirals.repairnator.process.inspectors.InspectorFactory;
 import ch.qos.logback.classic.Level;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -22,6 +23,7 @@ import fr.inria.spirals.repairnator.process.utils4tests.Utils4Tests;
 import fr.inria.spirals.repairnator.states.LauncherMode;
 import fr.inria.spirals.repairnator.states.ScannedBuildStatus;
 import org.apache.commons.io.FileUtils;
+import org.json.JSONException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -99,7 +101,7 @@ public class TestMetrics4BearsJsonFile {
     // Error presented in the Travis log: TestMetrics4BearsJsonFile.testBearsJsonFileWithPassingPassingBuilds:128 » FileNotFound
     @Ignore
     @Test
-    public void testBearsJsonFileWithPassingPassingBuilds() throws IOException, ProcessingException {
+    public void testBearsJsonFileWithPassingPassingBuilds() throws IOException, ProcessingException, JSONException {
         long buggyBuildCandidateId = 386337343; // https://travis-ci.org/fermadeiral/test-repairnator-bears/builds/386337343
         long patchedBuildCandidateId = 386348522; // https://travis-ci.org/fermadeiral/test-repairnator-bears/builds/386348522
 
@@ -174,7 +176,7 @@ public class TestMetrics4BearsJsonFile {
 
     @Ignore
     @Test
-    public void testRepairnatorJsonFileWithFailingBuild() throws IOException, ProcessingException {
+    public void testRepairnatorJsonFileWithFailingBuild() throws IOException, ProcessingException, JSONException {
         long buggyBuildCandidateId = 208897371; // https://travis-ci.org/surli/failingProject/builds/208897371
 
         tmpDir = Files.createTempDirectory("test_repairnator_json_file_failing_build").toFile();

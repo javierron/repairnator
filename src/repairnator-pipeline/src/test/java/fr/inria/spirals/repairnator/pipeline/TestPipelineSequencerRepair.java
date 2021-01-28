@@ -28,9 +28,9 @@ public class TestPipelineSequencerRepair {
     public void TestPipelineBuildPassBranch() throws Exception{
         // 703887431 -> javierron/faining project -> test failure
         Launcher launcher = new Launcher(new String[]{
-                "--build",
-                "703887431",
-                "--sequencerRepair",
+                "--build", "703887431",
+                "--launcherChoice", "NEW",
+                "--LauncherMode", "SEQUENCER_REPAIR",
                 "--workspace", workspaceFolder.getRoot().getAbsolutePath(),
                 "--output", outputFolder.getRoot().getAbsolutePath()
         });
@@ -48,9 +48,9 @@ public class TestPipelineSequencerRepair {
     public void TestPipelineBuildFailBranch() throws Exception{
         // 713361530 -> javierron/faining project -> syntax error
         Launcher launcher = new Launcher(new String[]{
-                "--build",
-                "713361530",
-                "--sequencerRepair",
+                "--build", "713361530",
+                "--launcherChoice", "NEW",
+                "--LauncherMode", "SEQUENCER_REPAIR",
                 "--workspace", workspaceFolder.getRoot().getAbsolutePath(),
                 "--output", outputFolder.getRoot().getAbsolutePath()
         });

@@ -24,14 +24,14 @@ public final class SequencerConfig {
     private static SequencerConfig instance;
 
     private SequencerConfig(){
-        this.dockerTag = getEnvOrDefault("SEQUENCER_DOCKER_TAG", "repairnator/sequencer:2.0");
+        this.dockerTag = getEnvOrDefault("SEQUENCER_DOCKER_TAG", "javierron/sequencer-multimodel:1.0");
         this.threads = Integer.parseInt(getEnvOrDefault("SEQUENCER_THREADS", "4"));
         this.beamSize = Integer.parseInt(getEnvOrDefault("SEQUENCER_BEAM_SIZE", "50"));
         this.timeout = Integer.parseInt(getEnvOrDefault("SEQUENCER_TIMEOUT", "120"));
         this.collectorPath = getEnvOrDefault("SEQUENCER_COLLECTOR_PATH",
                 System.getProperty("user.home") + "/continuous-learning-data");
         this.contextSize = Integer.parseInt(getEnvOrDefault("SEQUENCER_CONTEXT_SIZE", "3"));
-        this.ODSPath = (getEnvOrDefault("SEQUENCER_ODS_PATH", RepairnatorConfig.getInstance().getOutputPath() + "/ODSPatches"));
+        this.ODSPath = (getEnvOrDefault("SEQUENCER_ODS_PATH", "/ODSPatches"));
         this.rawURLSource = parseRawURLSource();
 
     }

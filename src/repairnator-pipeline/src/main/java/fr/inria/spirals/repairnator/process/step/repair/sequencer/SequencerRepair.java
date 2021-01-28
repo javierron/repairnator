@@ -94,6 +94,7 @@ public class SequencerRepair extends AbstractRepairStep {
         /// pull Sequencer if image not present
 
         try {
+            getLogger().info("DOCKER TAG: " + config.dockerTag);
             List<Image> images = docker.listImages(DockerClient.ListImagesParam.byName(config.dockerTag));
             if(images.size() <= 0) docker.pull(config.dockerTag);
         } catch (Exception e) {
@@ -201,8 +202,8 @@ public class SequencerRepair extends AbstractRepairStep {
 
                 docker.removeContainer(container.id());
 
-                this.getLogger().debug("stdOut: \n" + stdOut);
-                this.getLogger().debug("stdErr: \n" + stdErr);
+                this.getLogger().info("stdOut: \n" + stdOut);
+                this.getLogger().info("stdErr: \n" + stdErr);
 
                 return new SequencerResult(buggyFilePath.toString(), outputDirPath.toString(),
                         stdOut, stdErr);
@@ -238,9 +239,11 @@ public class SequencerRepair extends AbstractRepairStep {
 
             List<String> diffs = result.getDiffs();
 
-            diffs.stream().forEach(d -> System.out.println(d));
             Stream<RepairPatch> patches = diffs.stream()
-                .map(diff -> new RepairPatch(this.getRepairToolName(), result.getBuggyFilePath(), diff))
+                .map(diff -> {
+                    getLogger().info(diff);
+                    return new RepairPatch(this.getRepairToolName(), result.getBuggyFilePath(), diff);
+                })
                 .filter(detectionStrategy::validate);
 
             return patches;
@@ -275,7 +278,6 @@ public class SequencerRepair extends AbstractRepairStep {
             return StepStatus.buildPatchNotFound(this);
         }
 
-        notify(filteredPatches);
         this.recordPatches(filteredPatches, MAX_PATCH_PER_TOOL);
         this.recordToolDiagnostic(toolDiagnostic);
 

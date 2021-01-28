@@ -120,6 +120,7 @@ public abstract class AbstractRepairStep extends AbstractStep {
                 if (serializedPatches != null) {
                     try {
                         this.performStandardPRCreation(serializedPatches,patchNbsLimit);
+                        this.notify(patchList);
                     } catch (IOException | GitAPIException | URISyntaxException e) {
                         this.addStepError("Error while creating the PR", e);
                     }
@@ -127,7 +128,6 @@ public abstract class AbstractRepairStep extends AbstractStep {
                     this.addStepError("No file has been serialized, so no PR will be created");
                 }
             }
-            this.notify(patchList);
         }
     }
 
@@ -174,6 +174,7 @@ public abstract class AbstractRepairStep extends AbstractStep {
 
     protected void pushPatches(Git git, String forkedRepo,String branchName) throws IOException, GitAPIException, URISyntaxException {
         RemoteAddCommand remoteAddCommand = git.remoteAdd();
+        getLogger().info("URIish: " + forkedRepo);
         remoteAddCommand.setUri(new URIish(forkedRepo));
         remoteAddCommand.setName("fork-patch");
         remoteAddCommand.call();
